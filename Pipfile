@@ -23,9 +23,7 @@ langchain-community = "*"
 langsmith = "*"
 pillow = "*"
 langchain-pinecone = "*"
-certifi = "*"
 langchain-chroma = "*"
-python-dotenv = "*"
 langchain-tavily = "*"
 
 [dev-packages]
