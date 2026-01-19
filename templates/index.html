@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain Documentation Helper</title>
+
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0a0a0a',
+                            card: '#151515',
+                            border: '#1f1f1f',
+                            hover: '#1a1a1a',
+                            input: '#0f0f0f'
+                        },
+                        accent: {
+                            primary: '#10b981',
+                            secondary: '#06b6d4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3a3a3a;
+        }
+
+        /* Loading animation */
+        .typing-indicator span {
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Message animations */
+        .message-enter {
+            animation: messageSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glow effect */
+        .glow-border {
+            position: relative;
+        }
+        .glow-border::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .glow-border:focus-within::before {
+            opacity: 1;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Source toggle */
+        details summary {
+            cursor: pointer;
+            user-select: none;
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+        details[open] summary svg {
+            transform: rotate(90deg);
+        }
+
+        /* Button hover effect */
+        .btn-glow:hover {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Subtle pattern background */
+        .pattern-bg {
+            background-image: radial-gradient(circle at 1px 1px, #1a1a1a 1px, transparent 0);
+            background-size: 32px 32px;
+        }
+
+        /* Glass effect */
+        .glass {
+            background: rgba(21, 21, 21, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Pulse animation for logo */
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body class="bg-dark-bg text-gray-100 min-h-screen flex flex-col pattern-bg">
+
+    <!-- Header -->
+    <header class="border-b border-dark-border glass sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center pulse-ring shadow-lg shadow-emerald-500/20">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold gradient-text">LangChain Docs</h1>
+                    <p class="text-xs text-gray-500 font-medium">AI-Powered Documentation Assistant</p>
+                </div>
+            </div>
+            <button
+                onclick="clearChat()"
+                class="px-4 py-2.5 text-sm text-gray-400 hover:text-white bg-dark-card hover:bg-dark-hover border border-dark-border rounded-xl transition-all duration-200 flex items-center gap-2 group"
+            >
+                <svg class="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <span>New Chat</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Chat Container -->
+    <main class="flex-1 overflow-hidden flex flex-col max-w-3xl w-full mx-auto">
+
+        <!-- Messages Area -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-6 py-8 space-y-6">
+
+            <!-- Welcome Message -->
+            <div class="flex gap-4 message-enter">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex-shrink-0 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <div class="flex-1 pt-1">
+                    <div class="bg-dark-card border border-dark-border rounded-2xl rounded-tl-md px-5 py-4 shadow-xl shadow-black/20">
+                        <p class="text-gray-300 leading-relaxed">
+                            안녕하세요! <span class="text-emerald-400 font-medium">LangChain 문서</span>에 대해 무엇이든 물어보세요.
+                        </p>
+                        <p class="text-gray-400 text-sm mt-2">
+                            관련 문서를 검색하고 출처와 함께 답변해 드릴게요.
+                        </p>
+                        <div class="flex flex-wrap gap-2 mt-4">
+                            <button onclick="askQuestion('LangChain이 뭐야?')" class="px-3 py-1.5 text-xs bg-dark-hover border border-dark-border rounded-lg text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                                LangChain이 뭐야?
+                            </button>
+                            <button onclick="askQuestion('RAG가 뭐야?')" class="px-3 py-1.5 text-xs bg-dark-hover border border-dark-border rounded-lg text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                                RAG가 뭐야?
+                            </button>
+                            <button onclick="askQuestion('Agent는 어떻게 만들어?')" class="px-3 py-1.5 text-xs bg-dark-hover border border-dark-border rounded-lg text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                                Agent는 어떻게 만들어?
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Input Area -->
+        <div class="border-t border-dark-border glass p-6">
+            <form
+                id="chat-form"
+                hx-post="/chat"
+                hx-target="#chat-messages"
+                hx-swap="beforeend"
+                hx-indicator="#loading"
+                class="max-w-3xl mx-auto"
+            >
+                <div class="flex gap-3 items-end">
+                    <div class="flex-1 glow-border rounded-2xl">
+                        <div class="relative bg-dark-input border border-dark-border rounded-2xl overflow-hidden">
+                            <input
+                                type="text"
+                                name="message"
+                                id="message-input"
+                                placeholder="LangChain에 대해 질문하세요..."
+                                autocomplete="off"
+                                class="w-full bg-transparent px-5 py-4 pr-14 text-gray-100 placeholder-gray-600 focus:outline-none text-[15px]"
+                            >
+                            <button
+                                type="submit"
+                                id="submit-btn"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 flex items-center justify-center transition-all duration-200 btn-glow disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                            >
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="htmx-indicator flex justify-center mt-4">
+                <div class="flex items-center gap-3 px-4 py-2 bg-dark-card border border-dark-border rounded-full">
+                    <div class="typing-indicator flex items-center gap-1">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                    </div>
+                    <span class="text-sm text-gray-400">답변 생성 중...</span>
+                </div>
+            </div>
+
+            <!-- Footer hint -->
+            <p class="text-center text-xs text-gray-600 mt-4">
+                Enter를 눌러 전송 • Powered by GPT & Pinecone
+            </p>
+        </div>
+    </main>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const chatMessages = document.getElementById('chat-messages');
+
+        // Clear input immediately when form submits
+        chatForm.addEventListener('htmx:beforeRequest', function(e) {
+            const message = messageInput.value.trim();
+
+            if (!message) {
+                e.preventDefault();
+                return;
+            }
+
+            // Store message and clear input immediately
+            const userMessage = message;
+            messageInput.value = '';
+            messageInput.focus();
+
+            // Add user message to chat
+            const userMessageHTML = `
+                <div class="flex gap-4 justify-end message-enter">
+                    <div class="flex-1 flex justify-end pt-1">
+                        <div class="bg-gradient-to-br from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-2xl rounded-tr-md px-5 py-4 max-w-[85%] shadow-xl shadow-emerald-500/5">
+                            <p class="text-gray-200 leading-relaxed">${escapeHtml(userMessage)}</p>
+                        </div>
+                    </div>
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex-shrink-0 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                </div>
+            `;
+
+            chatMessages.insertAdjacentHTML('beforeend', userMessageHTML);
+            scrollToBottom();
+        });
+
+        // After response received
+        chatForm.addEventListener('htmx:afterRequest', function(e) {
+            scrollToBottom();
+        });
+
+        // Scroll to bottom smoothly
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 50);
+        }
+
+        // Clear chat
+        function clearChat() {
+            chatMessages.innerHTML = `
+                <div class="flex gap-4 message-enter">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex-shrink-0 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1 pt-1">
+                        <div class="bg-dark-card border border-dark-border rounded-2xl rounded-tl-md px-5 py-4 shadow-xl shadow-black/20">
+                            <p class="text-gray-300 leading-relaxed">
+                                안녕하세요! <span class="text-emerald-400 font-medium">LangChain 문서</span>에 대해 무엇이든 물어보세요.
+                            </p>
+                            <p class="text-gray-400 text-sm mt-2">
+                                관련 문서를 검색하고 출처와 함께 답변해 드릴게요.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <button onclick="askQuestion('LangChain이 뭐야?')" class="px-3 py-1.5 text-xs bg-dark-hover border border-dark-border rounded-lg text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                                    LangChain이 뭐야?
+                                </button>
+                                <button onclick="askQuestion('RAG가 뭐야?')" class="px-3 py-1.5 text-xs bg-dark-hover border border-dark-border rounded-lg text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                                    RAG가 뭐야?
+                                </button>
+                                <button onclick="askQuestion('Agent는 어떻게 만들어?')" class="px-3 py-1.5 text-xs bg-dark-hover border border-dark-border rounded-lg text-gray-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-all">
+                                    Agent는 어떻게 만들어?
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Quick question buttons
+        function askQuestion(question) {
+            messageInput.value = question;
+            htmx.trigger(chatForm, 'submit');
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Enter key to submit
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                htmx.trigger(chatForm, 'submit');
+            }
+        });
+
+        // Auto focus on load
+        messageInput.focus();
+    </script>
+</body>
+</html>
