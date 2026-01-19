@@ -25,6 +25,8 @@ pillow = "*"
 langchain-pinecone = "*"
 langchain-chroma = "*"
 langchain-tavily = "*"
+packaging = "==24.2"
+python-multipart = "*"
 
 [dev-packages]
 ipykernel = "*"
